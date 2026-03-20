@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Mini Sandbox</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #87CEEB; }
+    canvas { display: block; }
+    #ui {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background: #333;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="ui">
+  <button onclick="setBlock('grass')">Grass</button>
+  <button onclick="setBlock('dirt')">Dirt</button>
+  <button onclick="setBlock('stone')">Stone</button>
+  <button onclick="setBlock('erase')">Erase</button>
+</div>
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');let width, height; function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
+
+const blockSize = 32; const cols = Math.floor(width / blockSize); const rows = Math.floor(height / blockSize);
+
+const world = []; for (let y = 0; y < rows; y++) { world[y] = []; for (let x = 0; x < cols; x++) { world[y][x] = null; } }
+
+let currentBlock = 'grass'; function setBlock(type) { currentBlock = type; }
+
+function draw() { ctx.clearRect(0, 0, width, height);
+
+for (let y = 0; y < rows; y++) { for (let x = 0; x < cols; x++) { if (world[y][x]) { ctx.fillStyle = getColor(world[y][x]); ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize); } } } }
+
+function getColor(type) { switch(type) { case 'grass': return '#4CAF50'; case 'dirt': return '#8B4513'; case 'stone': return '#888'; } }
+
+canvas.addEventListener('touchstart', handleInput); canvas.addEventListener('mousedown', handleInput);
+
+function handleInput(e) { const rect = canvas.getBoundingClientRect(); const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left; const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
+const gridX = Math.floor(x / blockSize); const gridY = Math.floor(y / blockSize);
+
+if (gridX >= 0 && gridY >= 0 && gridX < cols && gridY < rows) { if (currentBlock === 'erase') { world[gridY][gridX] = null; } else { world[gridY][gridX] = currentBlock; } }
+
+draw(); }
+
+function loop() { draw(); requestAnimationFrame(loop); }
+
+loop(); </script>
+
+</body>
+</html>
